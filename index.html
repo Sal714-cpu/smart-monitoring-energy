@@ -1,294 +1,99 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart Monitoring Energy</title>
-  
-  <!-- Tambahkan Library Chart.js dari CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
-
-    body {
-      background-color: #f4f6f8;
-      color: #1c2025;
-      line-height: 1.5;
-      padding: 2rem;
-    }
-
-    .container {
-      max-width: 1000px;
-      margin: 0 auto;
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 2rem;
-      padding-bottom: 1.5rem;
-      border-bottom: 2px solid #e5e8ec;
-    }
-
-    .header h1 {
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: #12161a;
-    }
-
-    .status {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      padding: 6px 12px;
-      border-radius: 6px;
-      background-color: #ffffff;
-      border: 1px solid #d1d5db;
-      color: #4b5563;
-    }
-
-    .status-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background-color: #d1d5db;
-    }
-
-    .status.online { border-color: #bbf7d0; background-color: #f0fdf4; color: #166534; }
-    .status.online .status-dot { background-color: #22c55e; }
-    
-    .status.offline { border-color: #fecaca; background-color: #fef2f2; color: #991b1b; }
-    .status.offline .status-dot { background-color: #ef4444; }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .card {
-      background-color: #ffffff;
-      border: 1px solid #e5e8ec;
-      border-radius: 10px;
-      padding: 1.5rem;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-    }
-
-    .card-label {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #64748b;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 0.5rem;
-    }
-
-    .card-data {
-      display: flex;
-      align-items: baseline;
-      gap: 5px;
-    }
-
-    .value {
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: #0f172a;
-    }
-
-    .unit {
-      font-size: 1.1rem;
-      font-weight: 500;
-      color: #94a3b8;
-    }
-
-    .card.highlight { border-left: 4px solid #2563eb; }
-
-    /* Styling khusus untuk area Grafik */
-    .chart-card {
-      grid-column: 1 / -1; /* Membuat card membentang penuh dari kiri ke kanan */
-      margin-top: 1rem;
-    }
-
-    .chart-container {
-      position: relative;
-      height: 300px;
-      width: 100%;
-      margin-top: 1rem;
-    }
-
-    footer {
-      margin-top: 3rem;
-      text-align: center;
-      font-size: 0.85rem;
-      color: #94a3b8;
-    }
-
-    @media (max-width: 600px) {
-      body { padding: 1rem; }
-      .header { flex-direction: column; align-items: flex-start; gap: 1rem; }
-      .value { font-size: 2rem; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#14243a">
+<title>Smart Energy Monitoring</title>
+<style>
+:root{--bg:#f3f5f8;--card:#fff;--ink:#182437;--muted:#748196;--line:#e6ebf1;--navy:#14243a;--green:#16845b;--red:#c43d48}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,Helvetica,sans-serif}
+header{background:var(--navy);color:#fff;padding:22px 24px}.head{max-width:1120px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:15px}
+.brand{display:flex;align-items:center;gap:13px}.mark{width:42px;height:42px;border:1px solid #526176;border-radius:10px;display:grid;place-items:center;color:#a9d7c2;font-size:24px}
+h1{font-size:17px;letter-spacing:1.3px;margin:0}.sub{font-size:12px;color:#bdc8d6;margin-top:5px}
+.status{font-size:12px;color:#dce5ee;display:flex;align-items:center;gap:8px}.dot{width:8px;height:8px;border-radius:50%;background:#dda83e}.status.ok .dot{background:#43c58b}.status.bad .dot{background:#e36b73}
+main{max-width:1120px;margin:34px auto;padding:0 22px 35px}.intro{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:22px}
+.eyebrow{font-size:11px;letter-spacing:1.5px;font-weight:bold;color:#8390a2;margin-bottom:8px}h2{font-size:25px;letter-spacing:-.5px;margin:0}.desc{font-size:13px;color:var(--muted);margin:8px 0 0}
+.updated{text-align:right;font-size:12px;color:var(--muted);line-height:1.7}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:21px 22px;min-height:148px;box-shadow:0 5px 18px rgba(22,34,51,.04)}
+.cardtop{display:flex;justify-content:space-between;align-items:center}.label{font-size:12px;color:#667386;font-weight:bold;letter-spacing:.5px}.symbol{width:34px;height:34px;border-radius:9px;background:#f1f4f8;color:#51647b;display:grid;place-items:center;font-weight:bold}
+.reading{display:flex;align-items:baseline;gap:7px;margin-top:22px}.value{font-size:34px;font-weight:700;letter-spacing:-1px;font-variant-numeric:tabular-nums}.unit{font-size:13px;color:#8290a1}
+.bottom{display:flex;justify-content:space-between;margin-top:14px;font-size:11px;color:#98a2b0}.live:before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:#40b982;margin-right:6px}
+.notice{margin-top:18px;padding:13px 15px;background:#fff;border:1px solid var(--line);border-radius:9px;color:#748195;font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+footer{text-align:center;color:#9aa4b2;font-size:11px;padding:20px}
+@media(max-width:760px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.intro{align-items:flex-start;flex-direction:column}.updated{text-align:left}}
+@media(max-width:480px){header{padding:18px}.head{align-items:flex-start}main{padding:25px 14px}.grid{grid-template-columns:1fr;gap:11px}.card{min-height:130px;padding:18px}.value{font-size:31px}.status{font-size:11px}}
+</style>
 </head>
 <body>
+<header><div class="head">
+  <div class="brand"><div class="mark">∿</div><div><h1>SMART ENERGY</h1><div class="sub">Sistem Monitoring Energi Berbasis IoT</div></div></div>
+  <div class="status" id="connection"><i class="dot"></i><span id="statusText">Menghubungkan ke Blynk</span></div>
+</div></header>
+<main>
+  <section class="intro">
+    <div><div class="eyebrow">PEMANTAUAN LANGSUNG</div><h2>Parameter Kelistrikan</h2><p class="desc">Data pengukuran dari ESP32 dan sensor PZEM-004T.</p></div>
+    <div class="updated">Pembaruan terakhir<br><strong id="lastUpdate">Belum tersedia</strong></div>
+  </section>
+  <section class="grid">
+    <article class="card"><div class="cardtop"><span class="label">TEGANGAN</span><span class="symbol">V</span></div><div class="reading"><span class="value" id="voltage">—</span><span class="unit">Volt</span></div><div class="bottom"><span>Nilai RMS</span><span class="live">Live</span></div></article>
+    <article class="card"><div class="cardtop"><span class="label">ARUS</span><span class="symbol">I</span></div><div class="reading"><span class="value" id="current">—</span><span class="unit">Ampere</span></div><div class="bottom"><span>Arus beban</span><span class="live">Live</span></div></article>
+    <article class="card"><div class="cardtop"><span class="label">DAYA AKTIF</span><span class="symbol">P</span></div><div class="reading"><span class="value" id="power">—</span><span class="unit">Watt</span></div><div class="bottom"><span>Konsumsi daya</span><span class="live">Live</span></div></article>
+    <article class="card"><div class="cardtop"><span class="label">ENERGI</span><span class="symbol">E</span></div><div class="reading"><span class="value" id="energy">—</span><span class="unit">kWh</span></div><div class="bottom"><span>Energi terakumulasi</span><span class="live">Live</span></div></article>
+    <article class="card"><div class="cardtop"><span class="label">FREKUENSI</span><span class="symbol">f</span></div><div class="reading"><span class="value" id="frequency">—</span><span class="unit">Hertz</span></div><div class="bottom"><span>Frekuensi jaringan</span><span class="live">Live</span></div></article>
+    <article class="card"><div class="cardtop"><span class="label">FAKTOR DAYA</span><span class="symbol">PF</span></div><div class="reading"><span class="value" id="pf">—</span></div><div class="bottom"><span>Power factor</span><span class="live">Live</span></div></article>
+  </section>
+  <div class="notice" id="message">Menunggu data dari Blynk.</div>
+</main>
+<footer>ESP32 · PZEM-004T · Blynk IoT</footer>
+<script>
+// Masukkan DEVICE AUTH TOKEN BLYNK di bawah ini.
+const BLYNK_AUTH_TOKEN = "3ZIsWCNRYCII40KRjRrzgsNtTgaTs7UA";
+const BLYNK_BASE_URL = "https://blynk.cloud/external/api/get";
 
-  <div class="container">
-    <header class="header">
-      <h1>Smart Monitoring Energy</h1>
-      <div class="status" id="status-box">
-        <div class="status-dot" id="status-dot"></div>
-        <span id="status-text">Menghubungkan...</span>
-      </div>
-    </header>
+const points = {
+  V0: {id:"voltage", decimals:1},
+  V1: {id:"current", decimals:3},
+  V2: {id:"power", decimals:1},
+  V3: {id:"energy", decimals:3},
+  V4: {id:"frequency", decimals:1},
+  V5: {id:"pf", decimals:2}
+};
 
-    <div class="grid">
-      <!-- 6 Card Parameter -->
-      <div class="card">
-        <div class="card-label">Tegangan</div>
-        <div class="card-data"><span class="value" id="voltage">0.0</span><span class="unit">V</span></div>
-      </div>
-      <div class="card">
-        <div class="card-label">Arus</div>
-        <div class="card-data"><span class="value" id="current">0.000</span><span class="unit">A</span></div>
-      </div>
-      <div class="card highlight">
-        <div class="card-label">Daya Aktif</div>
-        <div class="card-data"><span class="value" id="power">0.0</span><span class="unit">W</span></div>
-      </div>
-      <div class="card">
-        <div class="card-label">Total Energi</div>
-        <div class="card-data"><span class="value" id="energy">0.000</span><span class="unit">kWh</span></div>
-      </div>
-      <div class="card">
-        <div class="card-label">Frekuensi</div>
-        <div class="card-data"><span class="value" id="frequency">0.0</span><span class="unit">Hz</span></div>
-      </div>
-      <div class="card">
-        <div class="card-label">Power Factor</div>
-        <div class="card-data"><span class="value" id="pf">0.00</span></div>
-      </div>
+const statusBox = document.getElementById("connection");
+const statusText = document.getElementById("statusText");
+const message = document.getElementById("message");
 
-      <!-- Card Grafik -->
-      <div class="card chart-card">
-        <div class="card-label">Grafik Daya Aktif (Watt) Real-Time</div>
-        <div class="chart-container">
-          <canvas id="powerChart"></canvas>
-        </div>
-      </div>
-    </div>
+async function readPin(pin) {
+  const url = `${BLYNK_BASE_URL}?token=${encodeURIComponent(BLYNK_AUTH_TOKEN)}&${pin}`;
+  const response = await fetch(url, {cache:"no-store"});
+  const body = (await response.text()).trim();
+  if (!response.ok) throw new Error(`${pin}: HTTP ${response.status} ${body}`);
+  const value = Number(body);
+  if (body === "" || !Number.isFinite(value)) throw new Error(`${pin}: respons bukan angka (${body})`);
+  return value;
+}
 
-    <footer>
-      Monitoring Real-Time • ESP32 & PZEM-004T • Update setiap 3 detik
-    </footer>
-  </div>
-
-  <script>
-    const BLYNK_AUTH_TOKEN = "MASUKKAN_BLYNK_AUTH_TOKEN_DI_SINI";
-    const BLYNK_URL = "https://blynk.cloud/external/api/get";
-
-    const statusBox = document.getElementById("status-box");
-    const statusText = document.getElementById("status-text");
-
-    // === KONFIGURASI GRAFIK CHART.JS ===
-    const ctx = document.getElementById('powerChart').getContext('2d');
-    const powerChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: [], // Akan diisi dengan waktu (Jam:Menit:Detik)
-        datasets: [{
-          label: 'Daya (Watt)',
-          data: [], // Akan diisi dengan nilai daya
-          borderColor: '#2563eb', // Warna garis biru
-          backgroundColor: 'rgba(37, 99, 235, 0.1)', // Warna isian di bawah garis
-          borderWidth: 2,
-          pointRadius: 3,
-          fill: true,
-          tension: 0.4 // Membuat garis melengkung halus (bezier)
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: false, // Dimatikan agar tidak ada animasi transisi berlebihan saat update data
-        scales: {
-          x: {
-            grid: { display: false }
-          },
-          y: {
-            beginAtZero: true,
-            suggestedMax: 100 // Angka maksimal sementara di sumbu Y (bisa disesuaikan dengan kapasitas beban trainer)
-          }
-        },
-        plugins: {
-          legend: { display: false } // Menyembunyikan legenda karena sudah ada judul di card
-        }
-      }
-    });
-
-    async function getData(pin) {
-      const url = `${BLYNK_URL}?token=${BLYNK_AUTH_TOKEN}&${pin}`;
-      const response = await fetch(url);
-      if (!response.ok) throw new Error("Gagal ambil data " + pin);
-      return await response.text();
+async function refreshData() {
+  try {
+        const entries = await Promise.all(Object.keys(points).map(async pin => [pin, await readPin(pin)]));
+    for (const [pin, value] of entries) {
+      const field = points[pin];
+      document.getElementById(field.id).textContent = value.toFixed(field.decimals);
     }
-
-    async function updateDashboard() {
-      try {
-        const [v, i, p, e, f, pf] = await Promise.all([
-          getData("V0"), getData("V1"), getData("V2"),
-          getData("V3"), getData("V4"), getData("V5")
-        ]);
-
-        const powerValue = Number(p);
-
-        // Update Text Parameter
-        document.getElementById("voltage").textContent = Number(v).toFixed(1);
-        document.getElementById("current").textContent = Number(i).toFixed(3);
-        document.getElementById("power").textContent = powerValue.toFixed(1);
-        document.getElementById("energy").textContent = Number(e).toFixed(3);
-        document.getElementById("frequency").textContent = Number(f).toFixed(1);
-        document.getElementById("pf").textContent = Number(pf).toFixed(2);
-
-        // Update Data Grafik
-        const now = new Date();
-        const timeString = now.getHours().toString().padStart(2, '0') + ':' + 
-                           now.getMinutes().toString().padStart(2, '0') + ':' + 
-                           now.getSeconds().toString().padStart(2, '0');
-
-        // Jika jumlah data lebih dari 20, hapus data paling kiri agar grafik berjalan maju
-        if (powerChart.data.labels.length > 20) {
-          powerChart.data.labels.shift();
-          powerChart.data.datasets[0].data.shift();
-        }
-
-        // Masukkan data baru ke grafik
-        powerChart.data.labels.push(timeString);
-        powerChart.data.datasets[0].data.push(powerValue);
-        powerChart.update();
-
-        // Update Status Online
-        statusBox.className = "status online";
-        statusText.textContent = "Online";
-
-      } catch (error) {
-        statusBox.className = "status offline";
-        statusText.textContent = "Terputus";
-        console.error(error);
-      }
-    }
-
-    updateDashboard();
-    setInterval(updateDashboard, 3000);
-  </script>
-
+    statusBox.className = "status ok";
+    statusText.textContent = "Data diterima";
+    document.getElementById("lastUpdate").textContent = new Date().toLocaleTimeString("id-ID");
+    message.textContent = "Data V0–V5 berhasil dibaca dari Blynk.";
+  } catch (error) {
+    statusBox.className = "status bad";
+    statusText.textContent = "Gagal mengambil data";
+    message.textContent = error.message + ". Jika muncul pesan CORS di Console browser, integrasi langsung dari HTML tidak didukung oleh browser dan memerlukan server perantara.";
+    console.error(error);
+  }
+}
+refreshData();
+setInterval(refreshData, 3000);
+</script>
 </body>
 </html>
