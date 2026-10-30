@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Monitoring Energy</title>
+  
+  <!-- Tambahkan Library Chart.js dari CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #f4f6f8;
+      color: #1c2025;
+      line-height: 1.5;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid #e5e8ec;
+    }
+
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #12161a;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 6px;
+      background-color: #ffffff;
+      border: 1px solid #d1d5db;
+      color: #4b5563;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: #d1d5db;
+    }
+
+    .status.online { border-color: #bbf7d0; background-color: #f0fdf4; color: #166534; }
+    .status.online .status-dot { background-color: #22c55e; }
+    
+    .status.offline { border-color: #fecaca; background-color: #fef2f2; color: #991b1b; }
+    .status.offline .status-dot { background-color: #ef4444; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background-color: #ffffff;
+      border: 1px solid #e5e8ec;
+      border-radius: 10px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    }
+
+    .card-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-data {
+      display: flex;
+      align-items: baseline;
+      gap: 5px;
+    }
+
+    .value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .unit {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #94a3b8;
+    }
+
+    .card.highlight { border-left: 4px solid #2563eb; }
+
+    /* Styling khusus untuk area Grafik */
+    .chart-card {
+      grid-column: 1 / -1; /* Membuat card membentang penuh dari kiri ke kanan */
+      margin-top: 1rem;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 300px;
+      width: 100%;
+      margin-top: 1rem;
+    }
+
+    footer {
+      margin-top: 3rem;
+      text-align: center;
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 1rem; }
+      .header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+      .value { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header class="header">
+      <h1>Smart Monitoring Energy</h1>
+      <div class="status" id="status-box">
+        <div class="status-dot" id="status-dot"></div>
+        <span id="status-text">Menghubungkan...</span>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- 6 Card Parameter -->
+      <div class="card">
+        <div class="card-label">Tegangan</div>
+        <div class="card-data"><span class="value" id="voltage">0.0</span><span class="unit">V</span></div>
+      </div>
+      <div class="card">
+        <div class="card-label">Arus</div>
+        <div class="card-data"><span class="value" id="current">0.000</span><span class="unit">A</span></div>
+      </div>
+      <div class="card highlight">
+        <div class="card-label">Daya Aktif</div>
+        <div class="card-data"><span class="value" id="power">0.0</span><span class="unit">W</span></div>
+      </div>
+      <div class="card">
+        <div class="card-label">Total Energi</div>
+        <div class="card-data"><span class="value" id="energy">0.000</span><span class="unit">kWh</span></div>
+      </div>
+      <div class="card">
+        <div class="card-label">Frekuensi</div>
+        <div class="card-data"><span class="value" id="frequency">0.0</span><span class="unit">Hz</span></div>
+      </div>
+      <div class="card">
+        <div class="card-label">Power Factor</div>
+        <div class="card-data"><span class="value" id="pf">0.00</span></div>
+      </div>
+
+      <!-- Card Grafik -->
+      <div class="card chart-card">
+        <div class="card-label">Grafik Daya Aktif (Watt) Real-Time</div>
+        <div class="chart-container">
+          <canvas id="powerChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      Monitoring Real-Time • ESP32 & PZEM-004T • Update setiap 3 detik
+    </footer>
+  </div>
+
+  <script>
+    const BLYNK_AUTH_TOKEN = "MASUKKAN_BLYNK_AUTH_TOKEN_DI_SINI";
+    const BLYNK_URL = "https://blynk.cloud/external/api/get";
+
+    const statusBox = document.getElementById("status-box");
+    const statusText = document.getElementById("status-text");
+
+    // === KONFIGURASI GRAFIK CHART.JS ===
+    const ctx = document.getElementById('powerChart').getContext('2d');
+    const powerChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [], // Akan diisi dengan waktu (Jam:Menit:Detik)
+        datasets: [{
+          label: 'Daya (Watt)',
+          data: [], // Akan diisi dengan nilai daya
+          borderColor: '#2563eb', // Warna garis biru
+          backgroundColor: 'rgba(37, 99, 235, 0.1)', // Warna isian di bawah garis
+          borderWidth: 2,
+          pointRadius: 3,
+          fill: true,
+          tension: 0.4 // Membuat garis melengkung halus (bezier)
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false, // Dimatikan agar tidak ada animasi transisi berlebihan saat update data
+        scales: {
+          x: {
+            grid: { display: false }
+          },
+          y: {
+            beginAtZero: true,
+            suggestedMax: 100 // Angka maksimal sementara di sumbu Y (bisa disesuaikan dengan kapasitas beban trainer)
+          }
+        },
+        plugins: {
+          legend: { display: false } // Menyembunyikan legenda karena sudah ada judul di card
+        }
+      }
+    });
+
+    async function getData(pin) {
+      const url = `${BLYNK_URL}?token=${BLYNK_AUTH_TOKEN}&${pin}`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Gagal ambil data " + pin);
+      return await response.text();
+    }
+
+    async function updateDashboard() {
+      try {
+        const [v, i, p, e, f, pf] = await Promise.all([
+          getData("V0"), getData("V1"), getData("V2"),
+          getData("V3"), getData("V4"), getData("V5")
+        ]);
+
+        const powerValue = Number(p);
+
+        // Update Text Parameter
+        document.getElementById("voltage").textContent = Number(v).toFixed(1);
+        document.getElementById("current").textContent = Number(i).toFixed(3);
+        document.getElementById("power").textContent = powerValue.toFixed(1);
+        document.getElementById("energy").textContent = Number(e).toFixed(3);
+        document.getElementById("frequency").textContent = Number(f).toFixed(1);
+        document.getElementById("pf").textContent = Number(pf).toFixed(2);
+
+        // Update Data Grafik
+        const now = new Date();
+        const timeString = now.getHours().toString().padStart(2, '0') + ':' + 
+                           now.getMinutes().toString().padStart(2, '0') + ':' + 
+                           now.getSeconds().toString().padStart(2, '0');
+
+        // Jika jumlah data lebih dari 20, hapus data paling kiri agar grafik berjalan maju
+        if (powerChart.data.labels.length > 20) {
+          powerChart.data.labels.shift();
+          powerChart.data.datasets[0].data.shift();
+        }
+
+        // Masukkan data baru ke grafik
+        powerChart.data.labels.push(timeString);
+        powerChart.data.datasets[0].data.push(powerValue);
+        powerChart.update();
+
+        // Update Status Online
+        statusBox.className = "status online";
+        statusText.textContent = "Online";
+
+      } catch (error) {
+        statusBox.className = "status offline";
+        statusText.textContent = "Terputus";
+        console.error(error);
+      }
+    }
+
+    updateDashboard();
+    setInterval(updateDashboard, 3000);
+  </script>
+
+</body>
+</html>
